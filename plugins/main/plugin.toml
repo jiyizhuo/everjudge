@@ -1,0 +1,12 @@
+[info]
+id = "everjudge.bulitin.main"
+name = "EverJudge"
+description_short = "The main module of EverJudge."
+description_long_path = "./description.md"
+version = "0.1.0"
+author = "Ayanami_404<jiyizhuo2011@hotmail.com>"
+maintainer = "Project EverJudge"
+license = "GPL3"
+
+[dependencies]
+dependencies = []
