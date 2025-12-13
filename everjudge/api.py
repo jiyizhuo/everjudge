@@ -3,20 +3,26 @@
 # The main Application Programming Interface for EverJudge.
 # @version: 0.1.0
 
-from flask import Blueprint, Flask
+from flask import Blueprint, Flask # Flask.
 
-import everjudge_share
-import functools
-import logging
-import pathlib
-import tomllib as toml
+import everjudge_share # The global object.
+import functools # For "wraps".
+import logging # The logging library. We do not want to be silent, do we?
+import pathlib # The path & file library.
+try:
+    import tomllib as toml # Using the built-in TOML parser.
+except ImportError:
+    try:
+        import tomli as toml # Using the site-package "tomli" to parse TOML files.
+    except:
+        raise # We've messed it up.
 
-_logger = logging.getLogger("EverJudge API")
+_logger = logging.getLogger("EverJudge API") # Quite bad. Why can't we get rid of this?
 _logger.setLevel(logging.INFO)
 
 class Application(object):
     def __init__(self, name: str, host: str="0.0.0.0", port: int=80, debug: bool=False):
-        self._flask_instance = Flask(name)
+        self._flask_instance = Flask(name, template_folder="../templates/")
         self._host = host
         self._port = port
         self._debug = debug
@@ -47,10 +53,6 @@ class Application(object):
 
 def create_application(name: str, host: str="0.0.0.0", port: int=80, debug: bool=False) -> Application:
     return Application(name, host, port, debug)
-
-def set_main_application(app_: Application) -> None:
-    everjudge_share.app = app_
-    return
 
 def get_main_application() -> Application | None:
     return everjudge_share.app

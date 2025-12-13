@@ -8,9 +8,15 @@
 
 from .api import *
 
+import everjudge_share
 import logging
 
 _logger = logging.getLogger("EverJudge Application")
+
+
+def set_main_application(app_: Application) -> None: # It's originally in the api.py, but we do not want it to be widely used.
+    everjudge_share.app = app_
+    return
 
 if __name__ == '__main__':
     _logger.info("Starting EverJudge Application...")
