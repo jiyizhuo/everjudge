@@ -3,6 +3,9 @@
 # The main Application Programming Interface for EverJudge.
 # @version: 0.1.0
 
+# Warning: We DO NOT recommend common plugins to use this API directly.
+# Please use the APIs in the "main" plugins instead.
+
 from flask import Blueprint, Flask # Flask.
 
 import everjudge_share # The global object.
