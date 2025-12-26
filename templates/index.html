@@ -1,0 +1,247 @@
+{% extends "_page.html" %}
+
+{% block title %}EverJudge - 首页{% endblock %}
+
+{% block content %}
+<!-- Hero Section: 欢迎区域 -->
+<section class="relative rounded-3xl overflow-hidden shadow-soft mb-12 group">
+    <!-- 背景装饰 -->
+    <div class="absolute inset-0 bg-gradient-to-r from-brand to-brand-dark opacity-90 transition-opacity duration-500 group-hover:opacity-95"></div>
+    <!-- 装饰性圆圈 -->
+    <div class="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
+    <div class="absolute top-1/2 left-1/4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+
+    <div class="relative px-8 py-16 md:py-24 flex flex-col md:flex-row items-center justify-between text-white">
+        <div class="md:w-1/2 mb-8 md:mb-0 z-10">
+            <div class="inline-block px-3 py-1 bg-white/20 rounded-full text-sm font-medium mb-4 backdrop-blur-sm border border-white/30">
+                🚀 EverJudge v1.0
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                探索算法的<br>无限可能
+            </h1>
+            <p class="text-lg md:text-xl text-brand-light/90 mb-8 max-w-lg">
+                加入 EverJudge，与全球开发者一起挑战难题，提升编程技能，备战大厂面试。
+            </p>
+            <div class="flex flex-wrap gap-4">
+                <a href="#" class="px-8 py-3 bg-white text-brand-dark font-bold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    开始刷题
+                </a>
+                <a href="#" class="px-8 py-3 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white/10 transition-all duration-300">
+                    查看比赛
+                </a>
+            </div>
+        </div>
+        
+        <!-- 右侧装饰性代码卡片 (C++ 风格) -->
+        <div class="md:w-5/12 w-full relative z-10 hidden md:block">
+            <div class="bg-slate-900/80 backdrop-blur-md rounded-xl p-6 shadow-2xl border border-white/10 transform rotate-2 hover:rotate-0 transition-transform duration-500">
+                <div class="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span class="ml-2 text-xs text-slate-400">main.cpp</span>
+                </div>
+                <div class="font-mono text-sm space-y-1">
+                    <p><span class="text-purple-400">#include</span> <span class="text-green-400">&lt;iostream&gt;</span></p>
+                    <p class="text-purple-400">using</span> <span class="text-blue-400">namespace</span> std;</p>
+                    <p class="text-slate-400 mt-2">int main() {</p>
+                    <p class="pl-4"><span class="text-blue-400">cout</span> &lt;&lt; <span class="text-green-400">"Hello, EverJudge!"</span>;</p>
+                    <p class="pl-4"><span class="text-blue-400">return</span> 0;</p>
+                    <p class="text-slate-400">}</p>
+                    <p class="text-slate-500 mt-2">// Accepted in 0.02s</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 主体内容网格 -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- 左侧栏：公告与最新动态 -->
+    <div class="lg:col-span-1 space-y-8">
+        
+        <!-- 公告栏 -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-brand"></i> 系统公告
+                </h2>
+                <a href="#" class="text-xs text-slate-400 hover:text-brand">查看全部</a>
+            </div>
+            
+            <div class="space-y-4">
+                {% for announcement in announcements %}
+                <div class="group cursor-pointer">
+                    <div class="flex gap-4 items-start">
+                        <div class="mt-1 min-w-[8px] h-[8px] rounded-full bg-brand/50 group-hover:bg-brand transition-colors"></div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-700 group-hover:text-brand transition-colors line-clamp-1">
+                                {{ announcement.title }}
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-1">{{ announcement.date }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-6 text-slate-400 text-sm">
+                    <i class="fa-regular fa-bell-slash text-2xl mb-2"></i>
+                    <p>暂无新公告</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 快速统计 -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="bg-brand-bg/50 rounded-2xl p-4 text-center border border-brand/10">
+                <div class="text-2xl font-bold text-brand-dark">{{ stats.total_users }}</div>
+                <div class="text-xs text-slate-500 mt-1">注册用户</div>
+            </div>
+            <div class="bg-brand-bg/50 rounded-2xl p-4 text-center border border-brand/10">
+                <div class="text-2xl font-bold text-brand-dark">{{ stats.total_submissions }}</div>
+                <div class="text-xs text-slate-500 mt-1">总提交数</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 中间栏：最新题目 -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 h-full">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-brand"></i> 最新题目
+                </h2>
+                <a href="/problems" class="text-sm font-medium text-brand hover:text-brand-dark flex items-center gap-1">
+                    题库 <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {% for problem in recent_problems %}
+                <a href="/problems/{{ problem.id }}" class="block group relative p-5 rounded-xl border border-slate-100 hover:border-brand/30 hover:shadow-md transition-all duration-300 bg-slate-50/50 hover:bg-white">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-mono font-bold text-slate-400">#{{ problem.id }}</span>
+                        
+                        <!-- 难度显示逻辑：根据 0-9 的数值显示不同颜色 -->
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold 
+                            {% if problem.difficulty <= 3 %}bg-green-100 text-green-600
+                            {% elif problem.difficulty <= 6 %}bg-yellow-100 text-yellow-600
+                            {% else %}bg-red-100 text-red-600{% endif %}">
+                            Lv.{{ problem.difficulty }}
+                        </span>
+                    </div>
+                    <h3 class="font-bold text-slate-700 group-hover:text-brand mb-2 transition-colors">{{ problem.title }}</h3>
+                    <div class="flex items-center gap-4 text-xs text-slate-400">
+                        <span class="flex items-center gap-1"><i class="fa-regular fa-clock"></i> {{ problem.time_limit }}ms</span>
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-memory"></i> {{ problem.memory_limit }}MB</span>
+                        <span class="flex items-center gap-1"><i class="fa-solid fa-users"></i> {{ problem.acceptance_rate }}% AC</span>
+                    </div>
+                </a>
+                {% else %}
+                <div class="col-span-2 text-center py-10 text-slate-400">
+                    暂无题目数据
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 第二行：比赛与排行榜 -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+    
+    <!-- 近期比赛 -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-brand"></i> 近期比赛
+            </h2>
+            <a href="/contests" class="text-sm font-medium text-brand hover:text-brand-dark">全部比赛</a>
+        </div>
+
+        <div class="space-y-4">
+            {% for contest in contests %}
+            <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-brand-bg/30 border border-transparent hover:border-brand/20 transition-all duration-300 group">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center text-brand shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-code-branch text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-700 group-hover:text-brand transition-colors">{{ contest.title }}</h3>
+                        <p class="text-xs text-slate-500 mt-1">
+                            <i class="fa-regular fa-clock mr-1"></i> {{ contest.start_time }}
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    {% if contest.status == 'upcoming' %}
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-600">未开始</span>
+                    {% elif contest.status == 'running' %}
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-600 animate-pulse">进行中</span>
+                    {% else %}
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-600">已结束</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-6 text-slate-400 text-sm">暂无比赛安排</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 积分排行榜 -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-brand"></i> 积分榜单
+            </h2>
+            <a href="/ranklist" class="text-sm font-medium text-brand hover:text-brand-dark">完整榜单</a>
+        </div>
+
+        <div class="overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-xs text-slate-400 border-b border-slate-100">
+                        <th class="py-2 pl-2 font-medium">排名</th>
+                        <th class="py-2 font-medium">用户</th>
+                        <th class="py-2 text-right pr-2 font-medium">Rating</th>
+                    </tr>
+                </thead>
+                <tbody class="text-sm">
+                    {% for user in top_users %}
+                    <tr class="group hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0">
+                        <td class="py-3 pl-2">
+                            {% if loop.index == 1 %}
+                                <i class="fa-solid fa-crown text-yellow-400 text-lg"></i>
+                            {% elif loop.index == 2 %}
+                                <i class="fa-solid fa-medal text-slate-300 text-lg"></i>
+                            {% elif loop.index == 3 %}
+                                <i class="fa-solid fa-medal text-orange-400 text-lg"></i>
+                            {% else %}
+                                <span class="text-slate-400 font-mono">{{ loop.index }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold">
+                                    {{ user.username[0]|upper }}
+                                </div>
+                                <span class="font-medium text-slate-700 group-hover:text-brand transition-colors">{{ user.username }}</span>
+                            </div>
+                        </div>
+                        <td class="py-3 text-right pr-2 font-mono font-bold text-slate-600">
+                            {{ user.rating }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center py-6 text-slate-400 text-sm">暂无排名数据</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

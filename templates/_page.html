@@ -1,14 +1,266 @@
-{% extends "_base.html" %}
-{% block head %}
-    <!-- 导入 Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EverJudge - 在线判题系统{% endblock %}</title>
+    
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            DEFAULT: '#39C5BB', // 用户指定的主色
+                            light: '#6DDCD4',   // 浅色变体，用于 hover
+                            dark: '#2BA39B',    // 深色变体，用于 active/pressed
+                            bg: '#F0FDFA',      // 极浅的背景色，用于强调区块
+                        },
+                        surface: '#FFFFFF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(57, 197, 187, 0.15)',
+                        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+                    }
+                }
+            }
+        }
+    </script>
 
-    <!-- 导入 Bootstrap Icons CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet"/>
-{% endblock %}
-{% block header %}
-    {% include "_header.html" %}
-{% endblock %}
-{% block script %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-{% endblock %}
+    <!-- 引入 Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 引入 FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* 极淡的灰白色背景 */
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 玻璃拟态效果工具类 */
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        /* 隐藏滚动条但保留功能 (可选) */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-slate-700 flex flex-col min-h-screen relative overflow-x-hidden">
+
+    <!-- 顶部装饰背景 (增加视觉层次) -->
+    <div class="fixed top-0 left-0 w-full h-64 bg-gradient-to-b from-brand-bg to-transparent pointer-events-none -z-10"></div>
+
+    <!-- 导航栏 -->
+    <header class="fixed top-0 w-full z-50 glass shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer group">
+                    <div class="w-10 h-10 bg-brand rounded-xl flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+                        <i class="fa-solid fa-code text-xl"></i>
+                    </div>
+                    <span class="font-bold text-2xl tracking-tight text-slate-800">
+                        Ever<span class="text-brand">Judge</span>
+                    </span>
+                </div>
+
+                <!-- 桌面端导航菜单 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                        首页
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                        题目列表
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                        比赛
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                        排名
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                        讨论
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                </nav>
+
+                <!-- 用户操作区 -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <!-- 搜索框 -->
+                    <div class="relative group">
+                        <input type="text" placeholder="搜索题目 ID..." 
+                            class="pl-10 pr-4 py-2 rounded-full bg-slate-100 border-none focus:ring-2 focus:ring-brand focus:bg-white transition-all w-48 focus:w-64 text-sm outline-none text-slate-700 placeholder-slate-400">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 group-focus-within:text-brand transition-colors"></i>
+                    </div>
+
+                    <!-- 登录/注册按钮 (未登录状态演示) -->
+                    <a href="#" class="text-slate-600 hover:text-brand font-medium px-3 py-2 transition-colors">登录</a>
+                    <a href="#" class="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-full font-medium shadow-soft hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
+                        注册
+                    </a>
+                </div>
+
+                <!-- 移动端菜单按钮 -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-brand focus:outline-none p-2">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 移动端菜单面板 (默认隐藏) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 absolute w-full shadow-lg">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">首页</a>
+                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">题目列表</a>
+                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">比赛</a>
+                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">排名</a>
+                <div class="border-t border-slate-100 my-2 pt-4 flex flex-col gap-3">
+                    <a href="#" class="block text-center w-full py-2 border border-brand text-brand rounded-lg font-medium hover:bg-brand hover:text-white transition-colors">登录</a>
+                    <a href="#" class="block text-center w-full py-2 bg-brand text-white rounded-lg font-medium hover:bg-brand-dark transition-colors">注册</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <!-- pt-24 确保内容不被固定的 Header 遮挡 -->
+    <main class="flex-grow pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        
+        <!-- Flash 消息提示区 -->
+        <div id="flash-messages" class="mb-6 space-y-3">
+            <!-- 示例消息 -->
+            <!-- 
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-r-lg shadow-sm flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fa-solid fa-circle-check mr-3"></i>
+                    <p>操作成功！</p>
+                </div>
+                <button class="text-green-500 hover:text-green-700"><i class="fa-solid fa-xmark"></i></button>
+            </div> 
+            -->
+        </div>
+
+        <!-- Jinja2 Block: 子页面将在这里注入内容 -->
+        {% block content %}{% endblock %}
+
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                
+                <!-- 左侧：Logo 与 许可证信息 -->
+                <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-code text-brand text-lg"></i>
+                        <span class="font-bold text-lg text-slate-800">EverJudge</span>
+                    </div>
+                    <p class="text-sm text-slate-500">
+                        &copy; 2025 Ayanami_404 & The EverJudge Development Team. All rights reserved.
+                    </p>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Licensed under <a href="#" class="hover:text-brand underline">BSD 3-Clause License</a>.
+                    </p>
+                </div>
+
+                <!-- 中间：友情链接 -->
+                <div class="flex flex-wrap justify-center gap-6 text-sm text-slate-500">
+                    <a href="#" class="hover:text-brand transition-colors">关于我们</a>
+                    <a href="#" class="hover:text-brand transition-colors">常见问题</a>
+                    <a href="#" class="hover:text-brand transition-colors">API 文档</a>
+                    <a href="#" class="hover:text-brand transition-colors">开源贡献</a>
+                </div>
+
+                <!-- 右侧：社交媒体 -->
+                <div class="flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-brand hover:text-white transition-all duration-300 transform hover:-translate-y-1">
+                        <i class="fa-brands fa-github"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-brand hover:text-white transition-all duration-300 transform hover:-translate-y-1">
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-brand hover:text-white transition-all duration-300 transform hover:-translate-y-1">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 交互脚本 -->
+    <script>
+        // 移动端菜单切换逻辑
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuBtn && mobileMenu) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                
+                // 切换图标
+                const icon = mobileMenuBtn.querySelector('i');
+                if (mobileMenu.classList.contains('hidden')) {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                } else {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-xmark');
+                }
+            });
+        }
+
+        // 简单的 Flash 消息自动消失逻辑 (如果将来通过 JS 动态添加消息)
+        document.addEventListener('DOMContentLoaded', () => {
+            const flashMessages = document.querySelectorAll('#flash-messages > div');
+            flashMessages.forEach(msg => {
+                // 添加关闭按钮逻辑
+                const closeBtn = msg.querySelector('button');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        msg.style.opacity = '0';
+                        msg.style.transform = 'translateY(-10px)';
+                        setTimeout(() => msg.remove(), 300);
+                    });
+                }
+                
+                // 5秒后自动消失
+                setTimeout(() => {
+                    if (msg.parentElement) {
+                        msg.style.transition = 'all 0.5s ease';
+                        msg.style.opacity = '0';
+                        setTimeout(() => msg.remove(), 500);
+                    }
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
