@@ -29,7 +29,7 @@ class LanguageProvider(abc.ABC):
     def interpret(self, group: int=0):
         pass
     
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def judge(self, group: int=0):
         pass
 
