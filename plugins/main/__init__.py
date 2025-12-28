@@ -101,7 +101,7 @@ def root():
 
 @main_blueprint.route("/problems")
 def problems():
-    from .database import Problem, ProblemSet, Submission, JudgeStatus
+    from .database import Problem, ProblemSet, Submission, JudgeStatus, db
 
     # 获取查询参数
     search = request.args.get('search', '')
@@ -198,6 +198,41 @@ def problems():
                            current_page=page,
                            total_pages=total_pages,
                            page_numbers=page_numbers)
+
+
+@main_blueprint.route("/problems/<int:problem_id>")
+def problem_detail(problem_id):
+    from .database import Problem, Submission, JudgeStatus, TestCase
+
+    problem = Problem.query.filter_by(id=problem_id, is_visible=True).first_or_404()
+    
+    sample_cases = TestCase.query.filter_by(problem_id=problem.id, is_sample=True).all()
+    
+    acceptance_rate = round(problem.accepted_submissions / problem.total_submissions * 100, 1) if problem.total_submissions > 0 else 0.0
+    
+    recent_submissions = []
+    try:
+        submissions = Submission.query.filter_by(problem_id=problem.id).order_by(Submission.submitted_at.desc()).limit(10).all()
+        recent_submissions = [
+            {
+                'id': s.id,
+                'user_id': s.user_id,
+                'language': s.language,
+                'status': s.status.value,
+                'execution_time': s.execution_time,
+                'memory_usage': s.memory_usage,
+                'submitted_at': s.submitted_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+            for s in submissions
+        ]
+    except Exception as e:
+        _logger.error(f"Error fetching submissions: {e}")
+
+    return render_template('problem_detail.html',
+                           problem=problem,
+                           sample_cases=sample_cases,
+                           acceptance_rate=acceptance_rate,
+                           recent_submissions=recent_submissions)
 
 
 def initialize_plugin():

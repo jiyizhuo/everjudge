@@ -1,0 +1,314 @@
+{% extends "_page.html" %}
+
+{% block title %}EverJudge - {{ problem.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    
+    <!-- 题目头部信息 -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            
+            <!-- 左侧：题目标题和基本信息 -->
+            <div class="flex-grow">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="font-mono font-bold text-slate-400">#{{ problem.id }}</span>
+                    
+                    <!-- 难度标签 -->
+                    <span class="px-2.5 py-1 rounded-lg text-xs font-bold
+                        {% if problem.difficulty <= 1 %}bg-green-100 text-green-600
+                        {% elif problem.difficulty <= 3 %}bg-emerald-100 text-emerald-600
+                        {% elif problem.difficulty <= 5 %}bg-yellow-100 text-yellow-600
+                        {% elif problem.difficulty <= 7 %}bg-orange-100 text-orange-600
+                        {% else %}bg-red-100 text-red-600{% endif %}">
+                        <i class="fa-solid fa-signal text-[10px] mr-1"></i>
+                        Lv.{{ problem.difficulty }}
+                    </span>
+                    
+                    <!-- 标签 -->
+                    {% if problem.tags %}
+                    {% for tag in problem.tags.split(',')[:3] %}
+                    <span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500">
+                        {{ tag }}
+                    </span>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <h1 class="text-2xl font-bold text-slate-800 mb-4">{{ problem.title }}</h1>
+                
+                <!-- 统计信息 -->
+                <div class="flex flex-wrap gap-6 text-sm text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-regular fa-clock text-slate-400"></i>
+                        <span>时间限制: {{ problem.time_limit }}ms</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-memory text-slate-400"></i>
+                        <span>内存限制: {{ problem.memory_limit }}MB</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-users text-slate-400"></i>
+                        <span>通过率: {{ acceptance_rate }}%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-slate-400"></i>
+                        <span>提交: {{ problem.total_submissions }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-check text-slate-400"></i>
+                        <span>通过: {{ problem.accepted_submissions }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：操作按钮 -->
+            <div class="flex gap-3">
+                <button class="px-6 py-2.5 bg-brand hover:bg-brand-dark text-white font-medium rounded-xl shadow-soft hover:shadow-lg transition-all duration-300 flex items-center gap-2">
+                    <i class="fa-solid fa-code"></i>
+                    提交代码
+                </button>
+                <button class="px-4 py-2.5 border border-slate-200 text-slate-600 hover:border-brand hover:text-brand rounded-xl transition-all duration-300">
+                    <i class="fa-regular fa-bookmark"></i>
+                </button>
+                <button class="px-4 py-2.5 border border-slate-200 text-slate-600 hover:border-brand hover:text-brand rounded-xl transition-all duration-300">
+                    <i class="fa-solid fa-share-nodes"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 左侧：题目描述 -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- 题目描述 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines text-brand"></i>
+                    题目描述
+                </h2>
+                <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                    {{ problem.description|safe }}
+                </div>
+            </div>
+
+            <!-- 输入格式 -->
+            {% if problem.input_format %}
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-to-bracket text-brand"></i>
+                    输入格式
+                </h2>
+                <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                    {{ problem.input_format|safe }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 输出格式 -->
+            {% if problem.output_format %}
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-brand"></i>
+                    输出格式
+                </h2>
+                <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                    {{ problem.output_format|safe }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 样例输入输出 -->
+            {% if sample_cases %}
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-flask text-brand"></i>
+                    样例输入输出
+                </h2>
+                
+                <div class="space-y-6">
+                    {% for sample in sample_cases %}
+                    <div class="border border-slate-200 rounded-xl overflow-hidden">
+                        <!-- 样例标题 -->
+                        <div class="bg-slate-50 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
+                            <span class="text-sm font-semibold text-slate-700">样例 {{ loop.index }}</span>
+                            <button class="text-xs text-brand hover:text-brand-dark transition-colors">
+                                <i class="fa-regular fa-copy mr-1"></i>复制
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-200">
+                            <!-- 样例输入 -->
+                            <div class="p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">输入</div>
+                                <pre class="bg-slate-900 text-slate-100 p-3 rounded-lg text-sm font-mono overflow-x-auto">{{ sample.input_file }}</pre>
+                            </div>
+                            
+                            <!-- 样例输出 -->
+                            <div class="p-4">
+                                <div class="text-xs font-semibold text-slate-500 mb-2">输出</div>
+                                <pre class="bg-slate-900 text-slate-100 p-3 rounded-lg text-sm font-mono overflow-x-auto">{{ sample.output_file }}</pre>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 约束条件 -->
+            {% if problem.constraints %}
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-brand"></i>
+                    约束条件
+                </h2>
+                <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                    {{ problem.constraints|safe }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 提示 -->
+            {% if problem.hint %}
+            <div class="bg-amber-50 rounded-2xl p-6 border border-amber-100">
+                <h2 class="text-lg font-bold text-amber-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                    提示
+                </h2>
+                <div class="prose prose-amber max-w-none text-amber-700 leading-relaxed">
+                    {{ problem.hint|safe }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 右侧：提交记录和操作 -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- 快速提交 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-code text-brand"></i>
+                    提交代码
+                </h2>
+                
+                <div class="space-y-4">
+                    <!-- 语言选择 -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">选择语言</label>
+                        <select class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all outline-none text-slate-700 cursor-pointer">
+                            <option value="cpp">C++17</option>
+                            <option value="c">C</option>
+                            <option value="python">Python 3</option>
+                            <option value="java">Java</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 代码编辑器占位 -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">源代码</label>
+                        <textarea class="w-full h-64 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all outline-none text-slate-700 font-mono text-sm resize-none" placeholder="在此输入您的代码..."></textarea>
+                    </div>
+                    
+                    <!-- 提交按钮 -->
+                    <button class="w-full py-3 bg-brand hover:bg-brand-dark text-white font-bold rounded-xl shadow-soft hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        提交
+                    </button>
+                </div>
+            </div>
+
+            <!-- 最新提交 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list text-brand"></i>
+                        最新提交
+                    </h2>
+                    <a href="#" class="text-xs text-brand hover:text-brand-dark">查看全部</a>
+                </div>
+                
+                <div class="space-y-3">
+                    {% for submission in recent_submissions %}
+                    <div class="p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-mono text-slate-500">#{{ submission.id }}</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold
+                                {% if submission.status == 'accepted' %}bg-green-100 text-green-600
+                                {% elif submission.status == 'wrong_answer' %}bg-red-100 text-red-600
+                                {% elif submission.status == 'time_limit_exceeded' %}bg-orange-100 text-orange-600
+                                {% elif submission.status == 'memory_limit_exceeded' %}bg-purple-100 text-purple-600
+                                {% elif submission.status == 'compilation_error' %}bg-yellow-100 text-yellow-600
+                                {% else %}bg-slate-100 text-slate-600{% endif %}">
+                                {{ submission.status|replace('_', ' ')|title }}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between text-xs text-slate-500">
+                            <span>{{ submission.language }}</span>
+                            <span>{{ submission.submitted_at }}</span>
+                        </div>
+                        {% if submission.execution_time %}
+                        <div class="text-xs text-slate-400 mt-1">
+                            <i class="fa-regular fa-clock mr-1"></i>{{ submission.execution_time }}ms
+                            {% if submission.memory_usage %}
+                            <i class="fa-solid fa-memory ml-2 mr-1"></i>{{ submission.memory_usage }}KB
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-6 text-slate-400 text-sm">
+                        <i class="fa-regular fa-folder-open text-2xl mb-2"></i>
+                        <p>暂无提交记录</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 相关题目 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-link text-brand"></i>
+                    相关题目
+                </h2>
+                
+                <div class="space-y-3">
+                    <a href="/problems/1" class="block p-3 rounded-lg bg-slate-50 hover:bg-brand-bg/30 border border-transparent hover:border-brand/20 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-semibold text-slate-700">A+B Problem</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-600">Lv.0</span>
+                        </div>
+                        <div class="text-xs text-slate-500">通过率: 98.5%</div>
+                    </a>
+                    
+                    <a href="/problems/2" class="block p-3 rounded-lg bg-slate-50 hover:bg-brand-bg/30 border border-transparent hover:border-brand/20 transition-all duration-300">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-semibold text-slate-700">Hello World</span>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-600">Lv.0</span>
+                        </div>
+                        <div class="text-xs text-slate-500">通过率: 99.2%</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // 复制样例输入/输出
+    $('.copy-btn').on('click', function() {
+        const textToCopy = $(this).data('copy');
+        navigator.clipboard.writeText(textToCopy).then(function() {
+            alert('已复制到剪贴板！');
+        }).catch(function(err) {
+            console.error('复制失败:', err);
+        });
+    });
+});
+</script>
+{% endblock %}
