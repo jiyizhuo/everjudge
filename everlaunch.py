@@ -170,5 +170,129 @@ def test(ctx: click.Context, language: str, file_name: str, exec_name: str, inpu
         sys.exit(1)
 
 
+@cli.group()
+def db():
+    """Database management commands"""
+    pass
+
+
+@db.command()
+@click.option('--reset', '-r', is_flag=True, help='Drop existing tables before creating')
+@click.option('--sample-data', '-s', is_flag=True, help='Create sample data after initialization')
+@click.pass_context
+def init(ctx: click.Context, reset: bool, sample_data: bool) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    from plugins.main.db_init import init_database, create_sample_data
+    
+    try:
+        Config.load()
+        Config.ensure_directories()
+        
+        click.echo("Creating database if not exists...")
+        Config.create_database_if_not_exists()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        db.init_app(flask_app)
+        
+        click.echo("Initializing database...")
+        with flask_app.app_context():
+            init_database(flask_app, drop_existing=reset)
+        
+        if sample_data:
+            click.echo("Creating sample data...")
+            with flask_app.app_context():
+                create_sample_data(flask_app)
+        
+        click.echo("Database initialization completed successfully!")
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@db.command()
+@click.pass_context
+def reset(ctx: click.Context) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    from plugins.main.db_init import reset_database
+    
+    try:
+        Config.load()
+        
+        click.echo("Creating database if not exists...")
+        Config.create_database_if_not_exists()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        db.init_app(flask_app)
+        
+        if click.confirm("This will delete all data. Are you sure?"):
+            click.echo("Resetting database...")
+            with flask_app.app_context():
+                reset_database(flask_app)
+            click.echo("Database reset completed successfully!")
+        else:
+            click.echo("Operation cancelled.")
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@db.command()
+@click.pass_context
+def info(ctx: click.Context) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    from plugins.main.db_init import get_database_info
+    
+    try:
+        Config.load()
+        
+        click.echo("Creating database if not exists...")
+        Config.create_database_if_not_exists()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        db.init_app(flask_app)
+        
+        click.echo("Database Information:")
+        click.echo("=" * 40)
+        
+        info = get_database_info(flask_app)
+        for key, value in info.items():
+            click.echo(f"  {key.replace('_', ' ').title()}: {value}")
+        
+        click.echo("=" * 40)
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
 if __name__ == '__main__':
     cli()

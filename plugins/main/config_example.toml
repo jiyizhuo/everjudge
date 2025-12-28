@@ -1,0 +1,81 @@
+[server]
+host = "0.0.0.0"
+port = 8080
+debug = false
+workers = 1
+
+[database]
+type = "sqlite"
+path = "./data/everjudge.db"
+username = ""
+password = ""
+host = ""
+port = 0
+database_name = "everjudge"
+pool_size = 5
+pool_timeout = 30
+pool_recycle = 3600
+echo = false
+
+[database.mysql]
+charset = "utf8mb4"
+
+[database.postgresql]
+sslmode = "disable"
+
+[judge]
+default_time_limit = 1000
+default_memory_limit = 256
+max_time_limit = 10000
+max_memory_limit = 1024
+compile_timeout = 30
+run_timeout = 5
+sandbox_enabled = false
+temp_dir = "./temp"
+input_dir = "./inputs"
+output_dir = "./outputs"
+
+[logging]
+level = "INFO"
+format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+file_enabled = false
+file_path = "./logs/everjudge.log"
+max_bytes = 10485760
+backup_count = 5
+
+[security]
+secret_key = "your-secret-key-change-this-in-production"
+session_lifetime = 86400
+csrf_enabled = true
+max_content_length = 10485760
+
+[language.c]
+compiler = "gcc"
+compile_flags = ["-O2", "-Wall"]
+file_extension = "c"
+
+[language.cpp]
+compiler = "g++"
+compile_flags = ["-O2", "-Wall", "-std=c++17"]
+file_extension = "cpp"
+
+[language.python]
+interpreter = "python3"
+file_extension = "py"
+
+[language.java]
+compiler = "javac"
+runner = "java"
+file_extension = "java"
+
+[upload]
+max_file_size = 10485760
+allowed_extensions = ["c", "cpp", "py", "java"]
+upload_dir = "./uploads"
+
+[features]
+registration_enabled = true
+guest_access = true
+problem_visibility = "public"
+submission_history = true
+leaderboard_enabled = true

@@ -5,9 +5,16 @@
 # @license: GPL3
 # @version: 0.1.0
 # Copyright Project EverJudge 2025, All Rights Reserved.
+
+import logging
 from flask import render_template, request
 
 from everjudge.api import *
+from .config_loader import Config
+from .database import db
+from .db_init import init_database
+
+_logger = logging.getLogger("EverJudge Main")
 
 main_blueprint = create_blueprint("main", "/")
 
@@ -158,4 +165,47 @@ def problems():
                            total_pages=total_pages,
                            page_numbers=page_numbers)
 
-get_main_application().register_blueprint(main_blueprint)
+
+def initialize_plugin():
+    try:
+        _logger.info("Initializing EverJudge main plugin...")
+
+        Config.load()
+        _logger.info("Configuration loaded successfully")
+
+        Config.ensure_directories()
+        _logger.info("Required directories created")
+
+        app = get_main_application()
+        if app is None:
+            _logger.warning("Main application not found, skipping initialization")
+            return
+
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+
+        _logger.info("Flask configuration applied")
+
+        db.init_app(flask_app)
+        _logger.info("Database initialized")
+
+        init_database(flask_app)
+        _logger.info("EverJudge main plugin initialized successfully")
+
+    except Exception as e:
+        _logger.error(f"Failed to initialize EverJudge main plugin: {e}", exc_info=True)
+        raise
+
+
+def register_plugin():
+    initialize_plugin()
+    app = get_main_application()
+    if app is not None:
+        app.register_blueprint(main_blueprint)
+    else:
+        _logger.warning("Main application not found, skipping blueprint registration")
+
+
+register_plugin()

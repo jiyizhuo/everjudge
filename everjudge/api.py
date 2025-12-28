@@ -60,7 +60,8 @@ def create_application(name: str, host: str="0.0.0.0", port: int=80, debug: bool
     _logger.info(f"Creating application '{name}'")
     return Application(name, host, port, debug)
 
-def set_main_application(app_: Application) -> None: # We've moved it back in order to finish the EverLaunch.
+def set_main_application(app_: Application) -> None: # DO NOT use it for no reason!!!
+    # We've moved this bloody thing back in order to finish the EverLaunch.
     everjudge_share.app = app_
     return
 

@@ -1,6 +1,13 @@
 # Flask Modules
-Flask
-watchdog # to restart the Flask instance in a different way. Not required but recommended.
+Flask # You know it's a web framework.
+Flask-SQLAlchemy # Databases! Finally!
+Flask-WTF # CSRF protection.
+watchdog # To restart the Flask instance in a different way. Not required but recommended.
+
+# Database Drivers (Optional)
+# Uncomment the following lines if you need MySQL or PostgreSQL support
+pymysql # MySQL database driver (also works for MariaDB)
+#psycopg2-binary # PostgreSQL database driver
 
 # Command Line Interface
 Click # For creating command-line interfaces
@@ -9,4 +16,4 @@ Click # For creating command-line interfaces
 # In 3.11, "tomllib" was added as a standard Python library. That means an extra TOML parser is no longer required.
 # However, if you're still using a legacy Python which is below 3.11, you need to install "tomli" as another TOML parser.
 # Uncomment the following line if you need to install the extra TOML parser.
-#tomli
+#tomli # Extra TOML parser for Python 3.10 and below.
