@@ -211,3 +211,4 @@ __marimo__/
 # Configure files
 plugins/*/config.toml
 data/
+migrations/

@@ -1,7 +1,8 @@
 # Flask Modules
 Flask # You know it's a web framework.
 Flask-SQLAlchemy # Databases! Finally!
-Flask-WTF # CSRF protection.
+Flask-WTF # CSRF protection & Forms.
+Flask-Migrate # Database migrations
 watchdog # To restart the Flask instance in a different way. Not required but recommended.
 
 # Database Drivers (Optional)

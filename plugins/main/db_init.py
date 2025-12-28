@@ -8,15 +8,27 @@
 # Copyright Project EverJudge 2025, All Rights Reserved.
 
 import logging
+import os
 from typing import Optional
 
-from .database import db, User, Problem, TestCase, Submission, Comment, Leaderboard, UserRole
+from .database import db, User, Problem, TestCase, Submission, Comment, Leaderboard, UserRole, ProblemSet, Contest, ContestType, ContestStatus, Discussion
 from .config_loader import Config
 
 _logger = logging.getLogger("EverJudge Database")
 
 
-def init_database(app, drop_existing: bool = False) -> None:
+def is_database_initialized(app) -> bool:
+    try:
+        with app.app_context():
+            inspector = db.inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            return len(existing_tables) > 0
+    except Exception as e:
+        _logger.warning(f"Failed to check database initialization status: {e}")
+        return False
+
+
+def init_database(app, drop_existing: bool = False, force_init: bool = False) -> None:
     try:
         _logger.info("Initializing database...")
 
@@ -25,12 +37,16 @@ def init_database(app, drop_existing: bool = False) -> None:
                 _logger.warning("Dropping all existing tables...")
                 db.drop_all()
                 _logger.info("All tables dropped")
+                db.create_all()
+            else:
+                db.create_all()
+                _logger.info("Database tables created successfully")
 
-            db.create_all()
-            _logger.info("Database tables created successfully")
-
-            create_default_admin(app)
-            create_default_leaderboard_entries(app)
+            if force_init or drop_existing:
+                create_default_admin(app)
+                create_default_leaderboard_entries(app)
+            else:
+                _logger.info("Skipping default data creation (use --force to create)")
 
             _logger.info("Database initialization completed")
 
@@ -42,20 +58,22 @@ def init_database(app, drop_existing: bool = False) -> None:
 def create_default_admin(app) -> None:
     try:
         with app.app_context():
-            admin = User.query.filter_by(username="admin").first()
+            admin_config = Config.get_admin_config()
+            default_username = admin_config.get("default_username", "admin")
+            admin = User.query.filter_by(username=default_username).first()
 
             if admin is None:
                 _logger.info("Creating default admin user...")
                 admin = User(
-                    username="admin",
-                    email="admin@everjudge.local",
+                    username=default_username,
+                    email=admin_config.get("default_email", "admin@everjudge.local"),
                     role=UserRole.ADMIN,
                     is_active=True
                 )
-                admin.set_password("admin123")
+                admin.set_password(admin_config.get("default_password", "admin123"))
                 db.session.add(admin)
                 db.session.commit()
-                _logger.info("Default admin user created (username: admin, password: admin123)")
+                _logger.info(f"Default admin user created (username: {default_username}, password: {admin_config.get('default_password', 'admin123')})")
                 _logger.warning("Please change the default admin password after first login!")
             else:
                 _logger.info("Admin user already exists")
@@ -102,10 +120,13 @@ def get_database_info(app) -> dict:
         with app.app_context():
             info = {
                 "users": User.query.count(),
+                "problem_sets": ProblemSet.query.count(),
                 "problems": Problem.query.count(),
                 "test_cases": TestCase.query.count(),
                 "submissions": Submission.query.count(),
                 "comments": Comment.query.count(),
+                "discussions": Discussion.query.count(),
+                "contests": Contest.query.count(),
                 "leaderboard_entries": Leaderboard.query.count()
             }
             return info
@@ -120,10 +141,24 @@ def create_sample_data(app) -> None:
         with app.app_context():
             _logger.info("Creating sample data...")
 
-            admin = User.query.filter_by(username="admin").first()
+            admin_config = Config.get_admin_config()
+            default_username = admin_config.get("default_username", "admin")
+            admin = User.query.filter_by(username=default_username).first()
             if not admin:
                 _logger.warning("Admin user not found, skipping sample data creation")
                 return
+
+            problem_set = ProblemSet.query.filter_by(name="默认题库").first()
+            if problem_set is None:
+                problem_set = ProblemSet(
+                    name="默认题库",
+                    description="系统默认题库",
+                    created_by=admin.id,
+                    is_visible=True
+                )
+                db.session.add(problem_set)
+                db.session.commit()
+                _logger.info("Default problem set created")
 
             sample_problems = [
                 {
@@ -134,7 +169,7 @@ def create_sample_data(app) -> None:
                     "constraints": "1 <= A, B <= 1000",
                     "sample_input": "1 2",
                     "sample_output": "3",
-                    "difficulty": "easy",
+                    "difficulty": 1,
                     "time_limit": 1000,
                     "memory_limit": 256
                 },
@@ -146,11 +181,15 @@ def create_sample_data(app) -> None:
                     "constraints": "None",
                     "sample_input": "",
                     "sample_output": "Hello, World!",
-                    "difficulty": "easy",
+                    "difficulty": 0,
                     "time_limit": 1000,
                     "memory_limit": 256
                 }
             ]
+
+            test_cases_dir = Config.get("judge.input_dir", "./inputs")
+            if not os.path.exists(test_cases_dir):
+                os.makedirs(test_cases_dir, exist_ok=True)
 
             for problem_data in sample_problems:
                 existing_problem = Problem.query.filter_by(title=problem_data["title"]).first()
@@ -166,16 +205,31 @@ def create_sample_data(app) -> None:
                         difficulty=problem_data["difficulty"],
                         time_limit=problem_data["time_limit"],
                         memory_limit=problem_data["memory_limit"],
+                        problem_set_id=problem_set.id,
                         created_by=admin.id
                     )
                     db.session.add(problem)
+                    db.session.flush()
+
+                    problem_test_dir = os.path.join(test_cases_dir, str(problem.id))
+                    if not os.path.exists(problem_test_dir):
+                        os.makedirs(problem_test_dir, exist_ok=True)
+
+                    input_file = os.path.join(problem_test_dir, "1.in")
+                    output_file = os.path.join(problem_test_dir, "1.out")
+
+                    with open(input_file, 'w', encoding='utf-8') as f:
+                        f.write(problem_data["sample_input"])
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        f.write(problem_data["sample_output"])
 
                     test_case = TestCase(
-                        problem=problem,
-                        input_data=problem_data["sample_input"],
-                        output_data=problem_data["sample_output"],
+                        problem_id=problem.id,
+                        test_number=1,
                         is_sample=True,
-                        score=1
+                        score=1,
+                        input_file=input_file,
+                        output_file=output_file
                     )
                     db.session.add(test_case)
 

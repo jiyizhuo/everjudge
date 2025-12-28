@@ -84,6 +84,10 @@ class Config:
         return cls._config.get("features", {})
 
     @classmethod
+    def get_admin_config(cls) -> Dict[str, Any]:
+        return cls._config.get("admin", {})
+
+    @classmethod
     def get_database_uri(cls) -> str:
         db_config = cls.get_database_config()
         db_type = db_config.get("type", "sqlite")
@@ -199,3 +203,7 @@ class Config:
             log_dir = os.path.dirname(log_path)
             if log_dir and not os.path.exists(log_dir):
                 os.makedirs(log_dir, exist_ok=True)
+
+        test_cases_dir = cls.get("judge.input_dir", "./inputs")
+        if test_cases_dir and not os.path.exists(test_cases_dir):
+            os.makedirs(test_cases_dir, exist_ok=True)

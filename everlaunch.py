@@ -178,12 +178,13 @@ def db():
 
 @db.command()
 @click.option('--reset', '-r', is_flag=True, help='Drop existing tables before creating')
+@click.option('--force', '-f', is_flag=True, help='Force creation of default admin and leaderboard data')
 @click.option('--sample-data', '-s', is_flag=True, help='Create sample data after initialization')
 @click.pass_context
-def init(ctx: click.Context, reset: bool, sample_data: bool) -> None:
+def init(ctx: click.Context, reset: bool, force: bool, sample_data: bool) -> None:
     from everjudge.api import create_application, set_main_application
     from plugins.main.config_loader import Config
-    from plugins.main.db_init import init_database, create_sample_data
+    from plugins.main.db_init import init_database, create_sample_data, is_database_initialized
     
     try:
         Config.load()
@@ -203,9 +204,13 @@ def init(ctx: click.Context, reset: bool, sample_data: bool) -> None:
         from plugins.main.database import db
         db.init_app(flask_app)
         
+        is_initialized = is_database_initialized(flask_app)
+        if is_initialized and not reset and not force:
+            click.echo("Database is already initialized. Use --reset to recreate or --force to update default data.")
+        
         click.echo("Initializing database...")
         with flask_app.app_context():
-            init_database(flask_app, drop_existing=reset)
+            init_database(flask_app, drop_existing=reset, force_init=force)
         
         if sample_data:
             click.echo("Creating sample data...")
@@ -288,6 +293,147 @@ def info(ctx: click.Context) -> None:
             click.echo(f"  {key.replace('_', ' ').title()}: {value}")
         
         click.echo("=" * 40)
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@db.command()
+@click.pass_context
+def init(ctx: click.Context) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    
+    try:
+        Config.load()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        from plugins.main import migrate as migrate_obj
+        
+        db.init_app(flask_app)
+        migrate_obj.init_app(flask_app, db)
+        
+        with flask_app.app_context():
+            from flask_migrate import init
+            init()
+        
+        click.echo("Migration directory initialized successfully!")
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@db.command()
+@click.option('--message', '-m', required=True, help='Migration message')
+@click.pass_context
+def migrate(ctx: click.Context, message: str) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    
+    try:
+        Config.load()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        from plugins.main import migrate as migrate_obj
+        
+        db.init_app(flask_app)
+        migrate_obj.init_app(flask_app, db)
+        
+        with flask_app.app_context():
+            from flask_migrate import upgrade, migrate as flask_migrate
+            flask_migrate(message=message)
+        
+        click.echo(f"Migration '{message}' created successfully!")
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@db.command()
+@click.pass_context
+def upgrade(ctx: click.Context) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    
+    try:
+        Config.load()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        from plugins.main import migrate as migrate_obj
+        
+        db.init_app(flask_app)
+        migrate_obj.init_app(flask_app, db)
+        
+        with flask_app.app_context():
+            from flask_migrate import upgrade
+            upgrade()
+        
+        click.echo("Database upgraded successfully!")
+        
+    except Exception as e:
+        click.echo(f"Error: {e}", err=True)
+        sys.exit(1)
+
+
+@db.command()
+@click.option('--revision', '-r', help='Specific revision to downgrade to')
+@click.pass_context
+def downgrade(ctx: click.Context, revision: str) -> None:
+    from everjudge.api import create_application, set_main_application
+    from plugins.main.config_loader import Config
+    
+    try:
+        Config.load()
+        
+        app = create_application("EverJudge", "0.0.0.0", 8080, False)
+        set_main_application(app)
+        
+        flask_app = app.get_flask_instance()
+        flask_config = Config.get_flask_config()
+        for key, value in flask_config.items():
+            flask_app.config[key] = value
+        
+        from plugins.main.database import db
+        from plugins.main import migrate as migrate_obj
+        
+        db.init_app(flask_app)
+        migrate_obj.init_app(flask_app, db)
+        
+        with flask_app.app_context():
+            from flask_migrate import downgrade
+            if revision:
+                downgrade(revision)
+            else:
+                downgrade()
+        
+        click.echo("Database downgraded successfully!")
         
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
