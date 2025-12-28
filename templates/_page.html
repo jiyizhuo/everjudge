@@ -8,6 +8,9 @@
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- 引入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     <!-- Tailwind 配置 -->
     <script>
         tailwind.config = {
@@ -87,23 +90,23 @@
 
                 <!-- 桌面端导航菜单 -->
                 <nav class="hidden md:flex space-x-8">
-                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                    <a href="/" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
                         首页
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
                     </a>
-                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                    <a href="/problems" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
                         题目列表
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
                     </a>
-                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                    <a href="/contests" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
                         比赛
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
                     </a>
-                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                    <a href="/ranks" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
                         排名
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
                     </a>
-                    <a href="#" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
+                    <a href="/discuss" class="text-slate-600 hover:text-brand font-medium transition-colors relative group py-2">
                         讨论
                         <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-brand transition-all duration-300 group-hover:w-full"></span>
                     </a>
@@ -137,10 +140,11 @@
         <!-- 移动端菜单面板 (默认隐藏) -->
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 absolute w-full shadow-lg">
             <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">首页</a>
-                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">题目列表</a>
-                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">比赛</a>
-                <a href="#" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">排名</a>
+                <a href="/" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">首页</a>
+                <a href="/problems" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">题目列表</a>
+                <a href="/contests" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">比赛</a>
+                <a href="/ranks" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">排名</a>
+                <a href="/discuss" class="block px-3 py-3 rounded-lg text-base font-medium text-slate-700 hover:text-brand hover:bg-brand-bg">讨论</a>
                 <div class="border-t border-slate-100 my-2 pt-4 flex flex-col gap-3">
                     <a href="#" class="block text-center w-full py-2 border border-brand text-brand rounded-lg font-medium hover:bg-brand hover:text-white transition-colors">登录</a>
                     <a href="#" class="block text-center w-full py-2 bg-brand text-white rounded-lg font-medium hover:bg-brand-dark transition-colors">注册</a>

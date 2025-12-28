@@ -35,10 +35,41 @@
 
 如果使用 `uv` 则运行以下命令：
 
+```sh
+ $ uv pip install -r requirements.txt
+```
+
 确保已经完成环境配置，执行：
 
 ```sh
- $ python3 -m everjudge
+ $ everlaunch start
+```
+
+或者使用 Python 模块方式：
+
+```sh
+ $ python -m everlaunch start
 ```
 
 大功告成。
+
+### 我可以贡献代码吗？
+
+当然可以！
+
+你可以在 [GitHub 仓库](https://github.com/jiyizhuo/everjudge) 中提交 Pull Request。
+
+我们欢迎所有形式的贡献，包括但不限于代码、文档、测试、翻译等。
+
+### 我可以报告问题吗？
+
+当然可以！
+
+你可以在 [GitHub 仓库](https://github.com/jiyizhuo/everjudge) 中提交 Issue。
+
+我们会尽快回复你。
+
+
+### 其它事项！
+
+请详见 `INSTRUCTIONS.md`。

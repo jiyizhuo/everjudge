@@ -2,6 +2,9 @@
 Flask
 watchdog # to restart the Flask instance in a different way. Not required but recommended.
 
+# Command Line Interface
+Click # For creating command-line interfaces
+
 # TOML Utilities
 # In 3.11, "tomllib" was added as a standard Python library. That means an extra TOML parser is no longer required.
 # However, if you're still using a legacy Python which is below 3.11, you need to install "tomli" as another TOML parser.

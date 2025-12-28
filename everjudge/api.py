@@ -27,7 +27,7 @@ _logger.setLevel(logging.INFO)
 
 class Application(object):
     def __init__(self, name: str, host: str="0.0.0.0", port: int=80, debug: bool=False):
-        self._flask_instance = Flask(name, template_folder="../templates/")
+        self._flask_instance = Flask(name, template_folder="./templates/")
         self._host = host
         self._port = port
         self._debug = debug
@@ -59,6 +59,10 @@ class Application(object):
 def create_application(name: str, host: str="0.0.0.0", port: int=80, debug: bool=False) -> Application:
     _logger.info(f"Creating application '{name}'")
     return Application(name, host, port, debug)
+
+def set_main_application(app_: Application) -> None: # We've moved it back in order to finish the EverLaunch.
+    everjudge_share.app = app_
+    return
 
 def get_main_application() -> Application | None:
     app = everjudge_share.app
